@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.example.newsaggregator.app-mergeDebugResources-3:/layout/activity_article.xml",
+        "source": "com.example.newsaggregator.app-main-6:/layout/activity_article.xml"
+    },
+    {
+        "merged": "com.example.newsaggregator.app-mergeDebugResources-3:/layout/activity_main.xml",
+        "source": "com.example.newsaggregator.app-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.newsaggregator.app-mergeDebugResources-3:/layout/item_news_article.xml",
+        "source": "com.example.newsaggregator.app-main-6:/layout/item_news_article.xml"
+    }
+]

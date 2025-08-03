@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.example.newsaggregator.app-merged_res-4:/layout_item_news_article.xml.flat",
+        "source": "com.example.newsaggregator.app-main-6:/layout/item_news_article.xml"
+    },
+    {
+        "merged": "com.example.newsaggregator.app-merged_res-4:/layout_activity_main.xml.flat",
+        "source": "com.example.newsaggregator.app-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.newsaggregator.app-merged_res-4:/layout_activity_article.xml.flat",
+        "source": "com.example.newsaggregator.app-main-6:/layout/activity_article.xml"
+    },
+    {
+        "merged": "com.example.newsaggregator.app-merged_res-4:/menu_menu_main.xml.flat",
+        "source": "com.example.newsaggregator.app-main-6:/menu/menu_main.xml"
+    }
+]
