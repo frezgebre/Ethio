@@ -4,7 +4,7 @@
             "outputFile": "com.example.newsaggregator.app-mergeDebugResources-2:/values-en-rIN/values-en-rIN.xml",
             "map": [
                 {
-                    "source": "/root/.gradle/caches/transforms-3/8775ed491970576126584cf24be3fe11/transformed/core-1.12.0/res/values-en-rIN/values-en-rIN.xml",
+                    "source": "/root/.gradle/caches/transforms-3/7ed6d08762a8d5c629362b47dfde18df/transformed/core-1.10.1/res/values-en-rIN/values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
