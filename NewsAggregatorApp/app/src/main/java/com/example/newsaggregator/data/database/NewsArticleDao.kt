@@ -12,7 +12,7 @@ interface NewsArticleDao {
     suspend fun insertAll(articles: List<NewsArticle>)
 
     @Query("SELECT * FROM news_articles ORDER BY pubDate DESC")
-    suspend fun getAllArticles(): List<NewsArticle>
+    fun getAllArticles(): kotlinx.coroutines.flow.Flow<List<NewsArticle>>
 
     @Query("DELETE FROM news_articles WHERE source = :sourceName")
     suspend fun deleteArticlesBySource(sourceName: String)

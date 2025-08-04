@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.newsaggregator.data.NewsArticle
 import com.example.newsaggregator.databinding.ItemNewsArticleBinding
 
@@ -38,6 +39,12 @@ class NewsAdapter(private val onItemClick: (NewsArticle) -> Unit) :
                 System.currentTimeMillis(),
                 DateUtils.MINUTE_IN_MILLIS
             )
+
+            Glide.with(binding.imageThumbnail.context)
+                .load(article.imageUrl)
+                .placeholder(android.R.drawable.ic_menu_gallery)
+                .error(android.R.drawable.ic_menu_report_image)
+                .into(binding.imageThumbnail)
 
             binding.root.setOnClickListener {
                 onItemClick(article)

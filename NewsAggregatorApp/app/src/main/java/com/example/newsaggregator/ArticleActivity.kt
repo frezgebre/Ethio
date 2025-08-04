@@ -1,6 +1,8 @@
 package com.example.newsaggregator
 
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +23,17 @@ class ArticleActivity : AppCompatActivity() {
 
     private fun setupWebView() {
         binding.webView.apply {
-            webViewClient = WebViewClient()
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    binding.progressBar.visibility = View.GONE
+                }
+            }
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true

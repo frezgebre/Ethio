@@ -41,12 +41,13 @@ class NewsRepository(private val context: Context) {
                     newsArticleDao.insertAll(articles)
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    throw e // Re-throw the exception to be handled by the ViewModel
                 }
             }
         }
     }
 
-    suspend fun getArticles(): List<NewsArticle> {
+    fun getArticles(): kotlinx.coroutines.flow.Flow<List<NewsArticle>> {
         return newsArticleDao.getAllArticles()
     }
 }
