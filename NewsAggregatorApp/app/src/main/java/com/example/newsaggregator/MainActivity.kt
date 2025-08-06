@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private var allArticles: List<NewsArticle> = emptyList()
     private var filteredArticles: List<NewsArticle> = emptyList()
+    private val searchHandler = android.os.Handler()
+    private var searchRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         setupSwipeRefresh()
         
         // Load initial data
+        binding.swipeRefreshLayout.post { binding.swipeRefreshLayout.isRefreshing = true }
         loadNews()
     }
 
@@ -49,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
+        recreate()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -64,7 +69,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterArticles(newText ?: "")
+                searchRunnable?.let { searchHandler.removeCallbacks(it) }
+                searchRunnable = Runnable {
+                    filterArticles(newText ?: "")
+                }
+                searchHandler.postDelayed(searchRunnable!!, 300)
                 return true
             }
         })
@@ -79,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_filter -> {
-                // TODO: Implement source filtering dialog
+                Toast.makeText(this, "Source filtering not yet implemented", Toast.LENGTH_SHORT).show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -157,6 +166,7 @@ class MainActivity : AppCompatActivity() {
                 allArticles = newsRepository.getArticles()
                 filteredArticles = allArticles
                 newsAdapter.submitList(filteredArticles)
+                Toast.makeText(this@MainActivity, "Failed to fetch fresh news. Displaying cached articles.", Toast.LENGTH_SHORT).show()
             } finally {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
