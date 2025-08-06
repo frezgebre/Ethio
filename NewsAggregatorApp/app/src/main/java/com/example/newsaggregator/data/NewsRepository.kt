@@ -32,22 +32,27 @@ class NewsRepository(private val context: Context) {
         "Debteraw" to "https://debteraw.com/feed"
     )
 
-    suspend fun fetchAndCacheArticles() {
+    suspend fun fetchAndCacheArticles(selectedSources: Set<String>) {
         withContext(Dispatchers.IO) {
-            rssFeedUrls.forEach { (sourceName, url) ->
-                try {
-                    val articles = rssParser.parseFeed(url, sourceName)
-                    newsArticleDao.deleteArticlesBySource(sourceName)
-                    newsArticleDao.insertAll(articles)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+            rssFeedUrls.filter { selectedSources.contains(it.key) }
+                .forEach { (sourceName, url) ->
+                    try {
+                        val articles = rssParser.parseFeed(url, sourceName)
+                        newsArticleDao.deleteArticlesBySource(sourceName)
+                        newsArticleDao.insertAll(articles)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
-            }
         }
     }
 
-    suspend fun getArticles(): List<NewsArticle> {
-        return newsArticleDao.getAllArticles()
+    suspend fun getArticles(selectedSources: Set<String>): List<NewsArticle> {
+        return newsArticleDao.getArticlesBySource(selectedSources.toList())
+    }
+
+    fun getSourceNames(): List<String> {
+        return rssFeedUrls.keys.toList()
     }
 }
 

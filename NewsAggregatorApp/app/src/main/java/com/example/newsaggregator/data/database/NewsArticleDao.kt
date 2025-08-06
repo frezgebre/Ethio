@@ -17,6 +17,9 @@ interface NewsArticleDao {
     @Query("DELETE FROM news_articles WHERE source = :sourceName")
     suspend fun deleteArticlesBySource(sourceName: String)
 
+    @Query("SELECT * FROM news_articles WHERE source IN (:sources) ORDER BY pubDate DESC")
+    suspend fun getArticlesBySource(sources: List<String>): List<NewsArticle>
+
     @Query("DELETE FROM news_articles")
     suspend fun deleteAllArticles()
 }

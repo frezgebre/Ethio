@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List
 import uuid
 from datetime import datetime
+import requests
 
 
 ROOT_DIR = Path(__file__).parent
@@ -35,10 +36,29 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class UrlCheckRequest(BaseModel):
+    urls: List[str]
+
+class UrlStatus(BaseModel):
+    url: str
+    status_code: int
+    status: str
+
 # Add your routes to the router instead of directly to app
-@api_router.get("/")
+@api_outer.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@api_router.post("/status/check", response_model=List[UrlStatus])
+async def check_url_status(request: UrlCheckRequest):
+    results = []
+    for url in request.urls:
+        try:
+            response = requests.get(url, timeout=5)
+            results.append(UrlStatus(url=url, status_code=response.status_code, status="OK"))
+        except requests.exceptions.RequestException as e:
+            results.append(UrlStatus(url=url, status_code=0, status=f"Error: {e}"))
+    return results
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):

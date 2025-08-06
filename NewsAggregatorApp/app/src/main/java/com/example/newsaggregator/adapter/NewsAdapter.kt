@@ -39,6 +39,15 @@ class NewsAdapter(private val onItemClick: (NewsArticle) -> Unit) :
                 DateUtils.MINUTE_IN_MILLIS
             )
 
+            if (article.imageUrl != null) {
+                binding.imageThumbnail.visibility = android.view.View.VISIBLE
+                com.bumptech.glide.Glide.with(binding.root)
+                    .load(article.imageUrl)
+                    .into(binding.imageThumbnail)
+            } else {
+                binding.imageThumbnail.visibility = android.view.View.GONE
+            }
+
             binding.root.setOnClickListener {
                 onItemClick(article)
             }

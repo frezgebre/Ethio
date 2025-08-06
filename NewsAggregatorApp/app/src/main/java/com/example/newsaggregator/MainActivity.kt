@@ -1,10 +1,12 @@
 package com.example.newsaggregator
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_filter -> {
-                Toast.makeText(this, "Source filtering not yet implemented", Toast.LENGTH_SHORT).show()
+                showSourceFilterDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -146,16 +148,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showSourceFilterDialog() {
+        val sourceNames = newsRepository.getSourceNames().toTypedArray()
+        val selectedSources = sharedPreferences.getStringSet("selected_sources", sourceNames.toSet()) ?: sourceNames.toSet()
+        val checkedItems = sourceNames.map { selectedSources.contains(it) }.toBooleanArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Select News Sources")
+            .setMultiChoiceItems(sourceNames, checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setPositiveButton("OK") { _, _ ->
+                val newSelectedSources = sourceNames.filterIndexed { index, _ -> checkedItems[index] }.toSet()
+                sharedPreferences.edit().putStringSet("selected_sources", newSelectedSources).apply()
+                loadNews()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun loadNews() {
         binding.swipeRefreshLayout.isRefreshing = true
         
         lifecycleScope.launch {
             try {
+                val selectedSources = sharedPreferences.getStringSet("selected_sources", newsRepository.getSourceNames().toSet()) ?: newsRepository.getSourceNames().toSet()
                 // Fetch fresh articles from RSS feeds
-                newsRepository.fetchAndCacheArticles()
+                newsRepository.fetchAndCacheArticles(selectedSources)
                 
                 // Get sorted articles from database
-                allArticles = newsRepository.getArticles()
+                allArticles = newsRepository.getArticles(selectedSources)
                 filteredArticles = allArticles
                 
                 // Update UI
@@ -163,7 +185,8 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 // Load cached articles if network fails
-                allArticles = newsRepository.getArticles()
+                val selectedSources = sharedPreferences.getStringSet("selected_sources", newsRepository.getSourceNames().toSet()) ?: newsRepository.getSourceNames().toSet()
+                allArticles = newsRepository.getArticles(selectedSources)
                 filteredArticles = allArticles
                 newsAdapter.submitList(filteredArticles)
                 Toast.makeText(this@MainActivity, "Failed to fetch fresh news. Displaying cached articles.", Toast.LENGTH_SHORT).show()
