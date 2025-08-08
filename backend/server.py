@@ -58,6 +58,20 @@ async def get_status_checks():
         sanitized.append(StatusCheck(**doc))
     return sanitized
 
+@api_router.get("/health")
+async def health_check():
+    mongo_ok = True
+    try:
+        # Motor ping
+        await db.command("ping")
+    except Exception:
+        mongo_ok = False
+    return {
+        "status": "ok",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "mongo": mongo_ok,
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
