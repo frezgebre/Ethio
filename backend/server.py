@@ -12,12 +12,13 @@ from datetime import datetime
 
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / ".env")
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+# MongoDB connection (use safe defaults; connect lazily)
+mongo_url = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+db_name = os.getenv("DB_NAME", "app")
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[db_name]
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -49,16 +50,30 @@ async def create_status_check(input: StatusCheckCreate):
 
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
+    # Sort newest first and limit result size; strip Mongo _id field to satisfy the response model
+    docs = await db.status_checks.find().sort("timestamp", -1).to_list(100)
+    sanitized: List[StatusCheck] = []
+    for doc in docs:
+        doc.pop("_id", None)
+        sanitized.append(StatusCheck(**doc))
+    return sanitized
 
 # Include the router in the main app
 app.include_router(api_router)
 
+# CORS configuration: avoid wildcard with credentials
+cors_origins_env = os.getenv("CORS_ALLOW_ORIGINS", "*")
+if cors_origins_env.strip() == "*":
+    allow_origins = ["*"]
+    allow_credentials = False
+else:
+    allow_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+    allow_credentials = os.getenv("CORS_ALLOW_CREDENTIALS", "false").lower() == "true"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
